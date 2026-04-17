@@ -50,6 +50,19 @@ En PowerShell:
 .\mvnw.cmd spring-boot:run
 ```
 
+## OpenAPI / Swagger
+
+- Swagger UI: `http://localhost:8080/swagger-ui.html`
+- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
+
+La documentacion de endpoints se encuentra separada del controlador en una interfaz contrato:
+
+- `src/main/java/com/proyecto/redes/backend/products/contract/ProductsApi.java`
+
+El controlador implementa esa interfaz y mantiene visibles los mappings HTTP (`@GetMapping`, `@PostMapping`, etc.):
+
+- `src/main/java/com/proyecto/redes/backend/products/controller/ProductController.java`
+
 ## Configuracion aplicada
 
 - `docker-compose.yml` levanta un contenedor `postgres:16-alpine`.

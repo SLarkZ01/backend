@@ -1,5 +1,6 @@
 package com.proyecto.redes.backend.products.controller;
 
+import com.proyecto.redes.backend.products.contract.ProductsApi;
 import com.proyecto.redes.backend.products.dto.CreateProductRequest;
 import com.proyecto.redes.backend.products.dto.ProductResponse;
 import com.proyecto.redes.backend.products.dto.UpdateProductRequest;
@@ -22,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/products")
-public class ProductController {
+public class ProductController implements ProductsApi {
 
     private final ProductService productService;
 
@@ -30,28 +31,33 @@ public class ProductController {
         this.productService = productService;
     }
 
+    @Override
     @PostMapping
     public ResponseEntity<ProductResponse> create(@Valid @RequestBody CreateProductRequest request) {
         ProductResponse created = productService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
+    @Override
     @GetMapping("/{id}")
     public ProductResponse getById(@PathVariable Long id) {
         return productService.getById(id);
     }
 
+    @Override
     @GetMapping
     public PageResponse<ProductResponse> getAll(@PageableDefault(size = 10, sort = "id") Pageable pageable) {
         Page<ProductResponse> page = productService.getAll(pageable);
         return PageResponse.from(page);
     }
 
+    @Override
     @PutMapping("/{id}")
     public ProductResponse update(@PathVariable Long id, @Valid @RequestBody UpdateProductRequest request) {
         return productService.update(id, request);
     }
 
+    @Override
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         productService.delete(id);
