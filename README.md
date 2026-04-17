@@ -63,6 +63,56 @@ El controlador implementa esa interfaz y mantiene visibles los mappings HTTP (`@
 
 - `src/main/java/com/proyecto/redes/backend/products/controller/ProductController.java`
 
+### Exportar OpenAPI con un solo comando
+
+Windows (PowerShell):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\export-openapi.ps1
+```
+
+Linux/macOS:
+
+```bash
+chmod +x scripts/export-openapi.sh
+./scripts/export-openapi.sh
+```
+
+Archivos generados:
+
+- `docs/openapi/openapi.json`
+- `docs/openapi/openapi.yaml`
+
+## CI/CD (GitHub Actions + AWS)
+
+Workflows incluidos:
+
+- `.github/workflows/ci-backend.yml`
+  - Ejecuta tests
+  - Exporta OpenAPI
+  - Publica `openapi.json` y `openapi.yaml` como artifacts
+- `.github/workflows/docker-backend.yml`
+  - Construye imagen Docker del backend
+  - Publica imagen a Amazon ECR (`latest` + SHA)
+- `.github/workflows/deploy-ec2.yml`
+  - Se conecta por SSH a EC2
+  - Actualiza `IMAGE_URI` en `.env`
+  - Hace `docker compose pull` y `docker compose up -d`
+
+### Secrets requeridos en GitHub
+
+- `AWS_REGION`
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
+- `EC2_HOST`
+- `EC2_USER`
+- `EC2_SSH_KEY`
+
+### Archivos para EC2
+
+- `deploy/docker-compose.ec2.yml`
+- `deploy/ec2.env.example` (copiar a `.env` en EC2 y ajustar valores)
+
 ## Configuracion aplicada
 
 - `docker-compose.yml` levanta un contenedor `postgres:16-alpine`.
