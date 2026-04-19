@@ -195,6 +195,8 @@ services:
     restart: unless-stopped
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      JPA_DDL_AUTO: ${JPA_DDL_AUTO}
+      SERVER_HTTP2_ENABLED: ${SERVER_HTTP2_ENABLED}
       DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
       DB_USERNAME: ${POSTGRES_USER}
       DB_PASSWORD: ${POSTGRES_PASSWORD}
@@ -257,6 +259,8 @@ cat > .env <<'EOF'
 IMAGE_URI=291328562559.dkr.ecr.us-east-2.amazonaws.com/techstock-backend:latest
 
 SPRING_PROFILES_ACTIVE=prod
+JPA_DDL_AUTO=update
+SERVER_HTTP2_ENABLED=false
 
 POSTGRES_DB=techstock_db
 POSTGRES_USER=techstock_user
@@ -274,6 +278,8 @@ EOF
 Que define este `.env`:
 - `IMAGE_URI`: URI completa de la imagen en ECR.
 - `SPRING_PROFILES_ACTIVE`: perfil de ejecucion del backend (`prod`).
+- `JPA_DDL_AUTO`: estrategia de schema en runtime (`update` recomendado para este despliegue).
+- `SERVER_HTTP2_ENABLED`: activa HTTP/2 en Jetty (`false` recomendado para evitar error de arranque por modulo faltante).
 - `POSTGRES_DB`: nombre de la base de datos.
 - `POSTGRES_USER`: usuario de PostgreSQL.
 - `POSTGRES_PASSWORD`: clave de PostgreSQL.
