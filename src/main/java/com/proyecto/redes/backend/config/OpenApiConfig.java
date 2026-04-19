@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Contact;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.info.License;
-import io.swagger.v3.oas.annotations.servers.Server;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
@@ -15,10 +14,7 @@ import org.springframework.context.annotation.Configuration;
                 description = "API REST para gestion de productos y operaciones del sistema.",
                 contact = @Contact(name = "Equipo TechStock"),
                 license = @License(name = "Uso interno")
-        ),
-        servers = {
-                @Server(url = "http://localhost:8080", description = "Servidor local")
-        }
+        )
 )
 public class OpenApiConfig {
 }
