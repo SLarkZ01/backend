@@ -17,4 +17,6 @@ COPY --from=builder /app/target/*.jar app.jar
 
 EXPOSE 8080
 
+ENV JAVA_TOOL_OPTIONS="-XX:+UseSerialGC -XX:InitialRAMPercentage=20 -XX:MaxRAMPercentage=70 -XX:+ExitOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom"
+
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]
