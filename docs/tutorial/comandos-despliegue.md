@@ -194,15 +194,25 @@ services:
     container_name: techstock-backend
     restart: unless-stopped
     environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
       DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
       DB_USERNAME: ${POSTGRES_USER}
       DB_PASSWORD: ${POSTGRES_PASSWORD}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
+      DB_POOL_MAX_SIZE: ${DB_POOL_MAX_SIZE}
+      DB_POOL_MIN_IDLE: ${DB_POOL_MIN_IDLE}
+      JETTY_THREADS_MAX: ${JETTY_THREADS_MAX}
+      JETTY_THREADS_MIN: ${JETTY_THREADS_MIN}
     depends_on:
       postgres:
         condition: service_healthy
-    ports:
-      - "8080:8080"
+    expose:
+      - "8080"
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider -q http://localhost:8080/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
 
   postgres:
     image: postgres:16-alpine
@@ -220,8 +230,24 @@ services:
       timeout: 5s
       retries: 5
 
+  caddy:
+    image: caddy:2-alpine
+    container_name: techstock-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - backend
+
 volumes:
   postgres_data:
+  caddy_data:
+  caddy_config:
 EOF
 ```
 
@@ -230,18 +256,30 @@ EOF
 cat > .env <<'EOF'
 IMAGE_URI=291328562559.dkr.ecr.us-east-2.amazonaws.com/techstock-backend:latest
 
+SPRING_PROFILES_ACTIVE=prod
+
 POSTGRES_DB=techstock_db
 POSTGRES_USER=techstock_user
 POSTGRES_PASSWORD=CAMBIA_ESTA_CLAVE_FUERTE
 
-CORS_ALLOWED_ORIGINS=https://tu-frontend.vercel.app
+DB_POOL_MAX_SIZE=5
+DB_POOL_MIN_IDLE=1
+JETTY_THREADS_MAX=50
+JETTY_THREADS_MIN=8
+
+CORS_ALLOWED_ORIGINS=https://frontend-redes.vercel.app
 EOF
 ```
 
 Que define este `.env`:
+- `IMAGE_URI`: URI completa de la imagen en ECR.
+- `SPRING_PROFILES_ACTIVE`: perfil de ejecucion del backend (`prod`).
 - `POSTGRES_DB`: nombre de la base de datos.
 - `POSTGRES_USER`: usuario de PostgreSQL.
 - `POSTGRES_PASSWORD`: clave de PostgreSQL.
+- `DB_POOL_MAX_SIZE` y `DB_POOL_MIN_IDLE`: tuning del pool de conexiones (Hikari).
+- `JETTY_THREADS_MAX` y `JETTY_THREADS_MIN`: tuning de hilos del servidor Jetty.
+- `CORS_ALLOWED_ORIGINS`: dominio del frontend permitido.
 - `DB_URL` no va directo en `.env`; se construye en `docker-compose.ec2.yml` para backend como:
   - `jdbc:postgresql://postgres:5432/${POSTGRES_DB}`
 - `DB_USERNAME` y `DB_PASSWORD` del backend usan `POSTGRES_USER` y `POSTGRES_PASSWORD`.
@@ -286,7 +324,7 @@ docker compose --env-file .env -f docker-compose.ec2.yml logs --no-color backend
 
 ### 12.2 Desde internet
 ```bash
-curl -sS "http://3.19.222.150:8080/v3/api-docs"
+curl -I https://parcial-redes.duckdns.org/v3/api-docs
 ```
 
 ## 13) HTTPS gratis con DuckDNS + Caddy (paso de endurecimiento)
@@ -307,7 +345,8 @@ EOF
 ```
 
 ### 13.3 Actualizar `docker-compose.ec2.yml` para agregar Caddy
-Usar servicio `caddy` con puertos `80:80` y `443:443`, y dejar `backend` con `expose: 8080`.
+Si tu archivo viene de una version antigua, agrega el servicio `caddy` con puertos `80:80` y `443:443`, y deja `backend` con `expose: 8080`.
+Si ya usas la version actual de esta guia, Caddy ya queda incluido desde el paso 9.1.
 
 ### 13.4 Levantar con Caddy
 ```bash
