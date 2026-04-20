@@ -183,24 +183,25 @@ CORS_ALLOWED_ORIGINS=https://frontend-redes.vercel.app
 
 ## 🖼️ Evidencias del proyecto
 
-### 1) API en produccion respondiendo
+### 1) Pipeline exitoso en GitHub Actions
+
+![Evidencia CI/CD](docs/images/evidencia-ci-cd.png.png)
+
+### 2) API en produccion respondiendo
 
 ![Evidencia API en produccion](docs/images/evidencia-api-produccion.png)
 
-### 2) Contenedores activos en EC2
+### 3) Contenedores activos en EC2
 
 ![Evidencia Docker en EC2](docs/images/evidencia-docker-ec2.png)
 
-### 3) Swagger/OpenAPI publicado
+### 4) Swagger/OpenAPI publicado
 
 ![Evidencia Swagger](docs/images/evidencia-swagger.png)
 
-### 4) Seguridad HTTPS valida
+### 5) Seguridad HTTPS valida
 
 ![Evidencia HTTPS](docs/images/evidencia-https.png)
-
-> [!TIP]
-> Si quieres agregar la evidencia del pipeline CI/CD, sube una captura como `docs/images/evidencia-ci-cd.png` y se puede incluir en esta misma seccion.
 
 ---
 

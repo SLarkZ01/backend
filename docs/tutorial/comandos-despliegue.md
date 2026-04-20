@@ -211,10 +211,11 @@ services:
     expose:
       - "8080"
     healthcheck:
-      test: ["CMD-SHELL", "wget --spider -q http://localhost:8080/actuator/health || exit 1"]
+      test: ["CMD-SHELL", "wget --spider -q http://localhost:8080/actuator/health/readiness || exit 1"]
       interval: 15s
       timeout: 5s
       retries: 10
+      start_period: 40s
 
   postgres:
     image: postgres:16-alpine
@@ -290,7 +291,7 @@ Que define este `.env`:
   - `jdbc:postgresql://postgres:5432/${POSTGRES_DB}`
 - `DB_USERNAME` y `DB_PASSWORD` del backend usan `POSTGRES_USER` y `POSTGRES_PASSWORD`.
 
-### 9.3 Verificar archivos creados
+### 9.4 Verificar archivos creados
 ```bash
 ls -la ~/techstock-backend
 ```
@@ -303,6 +304,24 @@ aws ecr get-login-password --region us-east-2 | docker login --username AWS --pa
 docker compose --env-file .env -f docker-compose.ec2.yml pull
 docker compose --env-file .env -f docker-compose.ec2.yml up -d
 docker compose --env-file .env -f docker-compose.ec2.yml ps
+```
+
+Validar estado de health del backend:
+
+```bash
+docker inspect techstock-backend --format '{{json .State.Health}}'
+```
+
+Si actualizaste `Dockerfile` o el `healthcheck`, fuerza recreacion del backend:
+
+```bash
+docker compose --env-file .env -f docker-compose.ec2.yml up -d --force-recreate backend
+```
+
+Si hiciste build manual en EC2 (sin ECR), puedes construir y levantar asi:
+
+```bash
+docker build -t techstock-backend:manual .
 ```
 
 ## 11) Deploy automatico por GitHub Actions
@@ -382,6 +401,20 @@ Solucion: pasar `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` al pa
 ### 14.4 API no responde publicamente
 Causa: regla de puerto faltante (`8080`, `80`, `443`) o no guardada.
 Solucion: revisar inbound rules y estado de contenedores.
+
+### 14.5 Backend `unhealthy` por `wget: not found`
+Causa: el `healthcheck` del backend usa `wget` y la imagen runtime no lo incluye.
+Solucion:
+
+1. Asegurar que el `Dockerfile` instale `wget` en la etapa final (`jre`).
+2. Reconstruir y publicar imagen nueva a ECR (`Docker Build and Push (ECR)`).
+3. Desplegar de nuevo en EC2 y recrear backend:
+
+```bash
+docker compose --env-file .env -f docker-compose.ec2.yml pull
+docker compose --env-file .env -f docker-compose.ec2.yml up -d --force-recreate backend
+docker compose --env-file .env -f docker-compose.ec2.yml ps
+```
 
 ## 15) Notas de seguridad para produccion
 
