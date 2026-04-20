@@ -1,4 +1,4 @@
-# 🚀 TechStock Backend - Portfolio DevOps (Spring Boot + AWS)
+# 🚀 TechStock Backend - DevOps (Spring Boot + AWS)
 
 Backend REST de productos desplegado en produccion real con arquitectura contenerizada, HTTPS y pipeline CI/CD automatizado en AWS.
 
@@ -186,7 +186,7 @@ CORS_ALLOWED_ORIGINS=https://frontend-redes.vercel.app
 
 ### 1) Pipeline exitoso en GitHub Actions
 
-![Evidencia CI/CD](docs/images/evidencia-ci-cd.png.png)
+![Evidencia CI/CD](docs/images/evidencia-ci-cd.png)
 
 ### 2) API en produccion respondiendo
 
@@ -214,6 +214,10 @@ CORS_ALLOWED_ORIGINS=https://frontend-redes.vercel.app
 
 ---
 
-## 👨‍💻 Autor
+## 👨‍💻 Autores
+
+- Daniel Rivas Agredo
+- Mateo Rivera
+- Thomas Montoya Magon
 
 Proyecto academico orientado a backend + redes + DevOps, con foco en despliegue real, observabilidad y buenas practicas de produccion.
