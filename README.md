@@ -150,6 +150,7 @@ Archivos generados:
 
 ### CD (`.github/workflows/deploy-ec2.yml`)
 
+- Se dispara despues de un build exitoso en `Docker Build and Push (ECR)`.
 - Se conecta por SSH a EC2.
 - Actualiza `IMAGE_URI` en `.env`.
 - Ejecuta `docker compose pull` y `docker compose up -d`.
