@@ -1,77 +1,126 @@
-# Backend - PostgreSQL con Docker
+# 🚀 TechStock Backend - Portfolio DevOps (Spring Boot + AWS)
 
-Este proyecto usa Spring Boot + PostgreSQL. Para desarrollo local, la base de datos corre en Docker usando `docker-compose`.
+Backend REST de productos desplegado en produccion real con arquitectura contenerizada, HTTPS y pipeline CI/CD automatizado en AWS.
 
-## 1) Preparar variables de entorno
+![Java](https://img.shields.io/badge/Java-25-orange?style=for-the-badge&logo=openjdk&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.x-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![AWS](https://img.shields.io/badge/AWS-EC2%20%2B%20ECR-232F3E?style=for-the-badge&logo=amazonaws&logoColor=white)
+![Caddy](https://img.shields.io/badge/HTTPS-Caddy-1F88C0?style=for-the-badge&logo=caddy&logoColor=white)
 
-1. Copia el archivo de ejemplo:
+---
 
-```bash
-cp .env.example .env
+## 🌐 Demo en produccion
+
+- API base: `https://parcial-redes.duckdns.org`
+- OpenAPI JSON: `https://parcial-redes.duckdns.org/v3/api-docs`
+- Swagger UI: `https://parcial-redes.duckdns.org/swagger-ui.html`
+
+> [!IMPORTANT]
+> Este proyecto fue construido como practica de parcial de redes, cumpliendo el objetivo de desplegar una aplicacion web en produccion con base de datos usando contenedores.
+
+---
+
+## 🧭 Arquitectura
+
+![Arquitectura del proyecto](docs/images/arquitectura%20del%20proyecto.png)
+
+### Flujo principal
+
+1. 👤 Cliente (Navegador/Postman/Frontend Vercel) consume el dominio HTTPS.
+2. 🌍 DuckDNS resuelve el dominio de la instancia EC2.
+3. 🔐 Caddy termina TLS y enruta trafico al backend.
+4. ⚙️ Spring Boot procesa la logica y accede a PostgreSQL.
+5. 🐳 Todo corre en contenedores Docker Compose dentro de EC2.
+6. 🔄 GitHub Actions compila, publica en ECR y despliega por SSH.
+
+---
+
+## ✨ Lo mas destacado del proyecto
+
+- ✅ CRUD de productos con validaciones y paginacion.
+- ✅ OpenAPI separado por contrato (`ProductsApi`) + controlador limpio.
+- ✅ Manejo global de errores con respuestas consistentes.
+- ✅ CORS configurable por entorno.
+- ✅ Health checks y Actuator para operacion.
+- ✅ Optimizaciones de rendimiento (Jetty, pool JDBC, cache Caffeine).
+- ✅ CI/CD completo: test, build Docker, push ECR, deploy EC2.
+- ✅ HTTPS real en produccion (Caddy + DuckDNS).
+
+---
+
+## 🧱 Stack tecnico
+
+- ☕ Java 25
+- 🍃 Spring Boot 4 (Web MVC, Validation, Data JPA, Actuator)
+- 🗄️ PostgreSQL 16
+- 🐳 Docker / Docker Compose
+- 🔐 Caddy (reverse proxy + TLS)
+- ☁️ AWS EC2 + Amazon ECR
+- 🔄 GitHub Actions
+- 📘 springdoc OpenAPI
+
+---
+
+## 📁 Estructura del proyecto
+
+```text
+src/main/java/com/proyecto/redes/backend/
+├─ config/
+├─ products/
+│  ├─ contract/
+│  ├─ controller/
+│  ├─ dto/
+│  ├─ entity/
+│  ├─ exception/
+│  ├─ mapper/
+│  ├─ repository/
+│  └─ service/
+└─ shared/api/
 ```
 
-En PowerShell (Windows):
+---
 
-```powershell
-Copy-Item .env.example .env
-```
+## ⚙️ Ejecucion local rapida
 
-2. Si quieres, cambia usuario/password/puerto en `.env`.
-
-## 2) Levantar PostgreSQL en Docker
+### 1) Levantar PostgreSQL
 
 ```bash
 docker compose up -d
-```
-
-Verifica estado:
-
-```bash
 docker compose ps
 ```
 
-Ver logs:
-
-```bash
-docker compose logs -f postgres
-```
-
-## 3) Ejecutar Spring Boot
-
-Con la BD arriba, ejecuta la app normalmente (IDE o Maven wrapper):
+### 2) Levantar backend
 
 ```bash
 ./mvnw spring-boot:run
 ```
 
-En PowerShell:
+Windows PowerShell:
 
 ```powershell
 .\mvnw.cmd spring-boot:run
 ```
 
-## OpenAPI / Swagger
+### 3) Ejecutar tests
 
-- Swagger UI: `http://localhost:8080/swagger-ui.html`
-- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
+```bash
+./mvnw -q test
+```
 
-La documentacion de endpoints se encuentra separada del controlador en una interfaz contrato:
+---
 
-- `src/main/java/com/proyecto/redes/backend/products/contract/ProductsApi.java`
+## 📘 OpenAPI y exportacion automatica
 
-El controlador implementa esa interfaz y mantiene visibles los mappings HTTP (`@GetMapping`, `@PostMapping`, etc.):
+- Swagger UI local: `http://localhost:8080/swagger-ui.html`
+- OpenAPI local: `http://localhost:8080/v3/api-docs`
 
-- `src/main/java/com/proyecto/redes/backend/products/controller/ProductController.java`
-
-### Exportar OpenAPI con un solo comando
-
-Windows (PowerShell):
+Exportar specs:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\export-openapi.ps1
 ```
-
-Linux/macOS:
 
 ```bash
 chmod +x scripts/export-openapi.sh
@@ -83,53 +132,86 @@ Archivos generados:
 - `docs/openapi/openapi.json`
 - `docs/openapi/openapi.yaml`
 
-## CI/CD (GitHub Actions + AWS)
+---
 
-Workflows incluidos:
+## 🔄 CI/CD en GitHub Actions
 
-- `.github/workflows/ci-backend.yml`
-  - Ejecuta tests
-  - Exporta OpenAPI
-  - Publica `openapi.json` y `openapi.yaml` como artifacts
-- `.github/workflows/docker-backend.yml`
-  - Construye imagen Docker del backend
-  - Publica imagen a Amazon ECR (`latest` + SHA)
-- `.github/workflows/deploy-ec2.yml`
-  - Se conecta por SSH a EC2
-  - Actualiza `IMAGE_URI` en `.env`
-  - Hace `docker compose pull` y `docker compose up -d`
+### CI (`.github/workflows/ci-backend.yml`)
 
-### Secrets requeridos en GitHub
+- Levanta PostgreSQL de pruebas.
+- Ejecuta tests.
+- Exporta OpenAPI.
+- Publica artifacts.
 
-- `AWS_REGION`
-- `AWS_ACCESS_KEY_ID`
-- `AWS_SECRET_ACCESS_KEY`
-- `EC2_HOST`
-- `EC2_USER`
-- `EC2_SSH_KEY`
+### Build & Push (`.github/workflows/docker-backend.yml`)
 
-### Archivos para EC2
+- Construye imagen Docker.
+- Publica imagen a Amazon ECR (`latest` y SHA).
 
-- `deploy/docker-compose.ec2.yml`
-- `deploy/ec2.env.example` (copiar a `.env` en EC2 y ajustar valores)
+### CD (`.github/workflows/deploy-ec2.yml`)
 
-## Configuracion aplicada
+- Se conecta por SSH a EC2.
+- Actualiza `IMAGE_URI` en `.env`.
+- Ejecuta `docker compose pull` y `docker compose up -d`.
 
-- `docker-compose.yml` levanta un contenedor `postgres:16-alpine`.
-- La data persiste en el volumen `postgres_data`.
-- `application.properties` usa variables de entorno con valores por defecto para conectar a PostgreSQL.
-- JPA usa `ddl-auto=update` para desarrollo.
+> [!TIP]
+> El proyecto ya aplica CI y CD. Cada push a `main` dispara integracion, build y despliegue automatico.
 
-## Comandos utiles
+---
 
-Detener servicios:
+## 🔐 Variables criticas de produccion (.env en EC2)
 
-```bash
-docker compose down
+```env
+IMAGE_URI=<account>.dkr.ecr.<region>.amazonaws.com/techstock-backend:latest
+SPRING_PROFILES_ACTIVE=prod
+JPA_DDL_AUTO=update
+SERVER_HTTP2_ENABLED=false
+POSTGRES_DB=techstock_db
+POSTGRES_USER=techstock_user
+POSTGRES_PASSWORD=<password_segura>
+DB_POOL_MAX_SIZE=5
+DB_POOL_MIN_IDLE=1
+JETTY_THREADS_MAX=50
+JETTY_THREADS_MIN=8
+CORS_ALLOWED_ORIGINS=https://frontend-redes.vercel.app
 ```
 
-Detener y borrar volumen (elimina datos de la BD):
+> [!WARNING]
+> Nunca subas `.env` real al repositorio. Usa `deploy/ec2.env.example` como plantilla y maneja secretos desde GitHub/AWS.
 
-```bash
-docker compose down -v
-```
+---
+
+## 🖼️ Evidencias del proyecto
+
+### 1) API en produccion respondiendo
+
+![Evidencia API en produccion](docs/images/evidencia-api-produccion.png)
+
+### 2) Contenedores activos en EC2
+
+![Evidencia Docker en EC2](docs/images/evidencia-docker-ec2.png)
+
+### 3) Swagger/OpenAPI publicado
+
+![Evidencia Swagger](docs/images/evidencia-swagger.png)
+
+### 4) Seguridad HTTPS valida
+
+![Evidencia HTTPS](docs/images/evidencia-https.png)
+
+> [!TIP]
+> Si quieres agregar la evidencia del pipeline CI/CD, sube una captura como `docs/images/evidencia-ci-cd.png` y se puede incluir en esta misma seccion.
+
+---
+
+## 📚 Documentacion complementaria
+
+- Guia completa de despliegue: `docs/tutorial/comandos-despliegue.md`
+- Compose de EC2: `deploy/docker-compose.ec2.yml`
+- Plantilla de entorno EC2: `deploy/ec2.env.example`
+
+---
+
+## 👨‍💻 Autor
+
+Proyecto academico orientado a backend + redes + DevOps, con foco en despliegue real, observabilidad y buenas practicas de produccion.
